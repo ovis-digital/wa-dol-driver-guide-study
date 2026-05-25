@@ -378,6 +378,15 @@ main {
   text-align: center;
 }
 
+.page-ref {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: 600;
+  font-style: italic;
+}
+
 .star-btn {
   position: absolute;
   top: 12px;

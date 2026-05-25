@@ -185,7 +185,7 @@
     const q = QUESTIONS.find(q => q.id === flash.ids[flash.idx]);
     document.getElementById("flashQuestion").textContent = q.question;
     document.getElementById("flashAnswer").textContent = q.choices[q.correctIndex];
-    document.getElementById("flashExplanation").textContent = q.explanation;
+    document.getElementById("flashExplanation").innerHTML = q.explanation + (q.page ? `<span class="page-ref">DOL Guide p. ${q.page}</span>` : "");
     document.getElementById("flashCounter").textContent = `${flash.idx + 1} / ${flash.ids.length}`;
 
     const starred = getProgress(q.id).starred;
@@ -292,7 +292,7 @@
 
     const feedback = document.getElementById("quizFeedback");
     feedback.className = "quiz-feedback " + (isCorrect ? "correct" : "incorrect");
-    feedback.textContent = isCorrect ? "Correct! " + q.explanation : "Incorrect. " + q.explanation;
+    feedback.innerHTML = (isCorrect ? "Correct! " : "Incorrect. ") + q.explanation + (q.page ? `<span class="page-ref">DOL Guide p. ${q.page}</span>` : "");
     feedback.style.display = "block";
 
     document.getElementById("checkAnswer").style.display = "none";
@@ -333,7 +333,7 @@
             <div class="summary-item-q">${q.question}</div>
             <div class="summary-item-your">Your answer: ${ans !== undefined ? q.choices[ans] : "Not answered"}</div>
             <div class="summary-item-correct">Correct: ${q.choices[q.correctIndex]}</div>
-            <div class="summary-item-explanation">${q.explanation}</div>
+            <div class="summary-item-explanation">${q.explanation}${q.page ? `<span class="page-ref">DOL Guide p. ${q.page}</span>` : ""}</div>
           </div>`;
       }
     });
@@ -522,7 +522,7 @@
             <div class="summary-item-q">${q.question}</div>
             <div class="summary-item-your">Your answer: ${ans !== undefined ? q.choices[ans] : "Not answered"}</div>
             <div class="summary-item-correct">Correct: ${q.choices[q.correctIndex]}</div>
-            <div class="summary-item-explanation">${q.explanation}</div>
+            <div class="summary-item-explanation">${q.explanation}${q.page ? `<span class="page-ref">DOL Guide p. ${q.page}</span>` : ""}</div>
           </div>`;
       }
     });
