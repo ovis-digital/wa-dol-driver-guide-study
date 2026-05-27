@@ -349,10 +349,7 @@
 
   let test = { ids: [], idx: 0, answers: {}, flags: {}, timer: null, timeLeft: 0 };
 
-  function startPracticeTest() {
-    const count = parseInt(document.getElementById("testCount").value);
-    const timerMin = parseInt(document.getElementById("testTimer").value);
-
+  function selectTestQuestions(count) {
     const chapterWeights = {};
     CHAPTERS.forEach(ch => {
       chapterWeights[ch.id] = QUESTIONS.filter(q => q.chapter === ch.id).length;
@@ -365,7 +362,14 @@
       const n = Math.max(1, Math.round((chapterWeights[ch.id] / totalQ) * count));
       selected.push(...chapterQs.slice(0, n));
     });
-    selected = shuffle(selected).slice(0, count);
+    return shuffle(selected).slice(0, count);
+  }
+
+  function startPracticeTest() {
+    const count = parseInt(document.getElementById("testCount").value);
+    const timerMin = parseInt(document.getElementById("testTimer").value);
+
+    const selected = selectTestQuestions(count);
     if (selected.length === 0) { alert("No questions available."); return; }
 
     test.ids = selected.map(q => q.id);
@@ -387,6 +391,96 @@
 
     buildTestNavStrip();
     renderTestQuestion();
+  }
+
+  function generateTestPDF(includeAnswerKey) {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("PDF library failed to load. Please check your internet connection and refresh.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+
+    const count = parseInt(document.getElementById("testCount").value);
+    const questions = selectTestQuestions(count);
+    if (questions.length === 0) { alert("No questions available."); return; }
+
+    const LETTERS = ["A", "B", "C", "D"];
+    const PAGE_WIDTH = 612;
+    const MARGIN_LEFT = 50;
+    const MARGIN_RIGHT = 50;
+    const MARGIN_TOP = 60;
+    const MARGIN_BOTTOM = 60;
+    const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
+    const PAGE_HEIGHT = 792;
+    let y = MARGIN_TOP;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("WA DOL Knowledge Exam - Practice Test", PAGE_WIDTH / 2, y, { align: "center" });
+    y += 24;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(count + " Questions", PAGE_WIDTH / 2, y, { align: "center" });
+    y += 12;
+    doc.text("Date: " + new Date().toLocaleDateString(), PAGE_WIDTH / 2, y, { align: "center" });
+    y += 30;
+
+    function checkPageBreak(needed) {
+      if (y + needed > PAGE_HEIGHT - MARGIN_BOTTOM) {
+        doc.addPage();
+        y = MARGIN_TOP;
+      }
+    }
+
+    doc.setFontSize(11);
+    questions.forEach((q, i) => {
+      const qLines = doc.splitTextToSize((i + 1) + ". " + q.question, CONTENT_WIDTH);
+      const blockHeight = (qLines.length * 14) + (4 * 16) + 20;
+      checkPageBreak(blockHeight);
+
+      doc.setFont("helvetica", "bold");
+      doc.text(qLines, MARGIN_LEFT, y);
+      y += qLines.length * 14 + 6;
+
+      doc.setFont("helvetica", "normal");
+      q.choices.forEach((choice, ci) => {
+        const cLines = doc.splitTextToSize("    " + LETTERS[ci] + ". " + choice, CONTENT_WIDTH - 20);
+        checkPageBreak(cLines.length * 14 + 4);
+        doc.text(cLines, MARGIN_LEFT, y);
+        y += cLines.length * 14 + 2;
+      });
+      y += 12;
+    });
+
+    if (includeAnswerKey) {
+      doc.addPage();
+      y = MARGIN_TOP;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Answer Key", PAGE_WIDTH / 2, y, { align: "center" });
+      y += 30;
+
+      doc.setFontSize(10);
+      const COL_WIDTH = CONTENT_WIDTH / 2;
+      const COL1_X = MARGIN_LEFT;
+      const COL2_X = MARGIN_LEFT + COL_WIDTH;
+      const HALF = Math.ceil(questions.length / 2);
+      const startY = y;
+
+      questions.forEach((q, i) => {
+        const col = i < HALF ? COL1_X : COL2_X;
+        const row = i < HALF ? i : i - HALF;
+        const rowY = startY + (row * 18);
+
+        doc.setFont("helvetica", "bold");
+        doc.text((i + 1) + ".", col, rowY);
+        doc.setFont("helvetica", "normal");
+        doc.text(LETTERS[q.correctIndex], col + 28, rowY);
+      });
+    }
+
+    doc.output("dataurlnewwindow");
   }
 
   function startTestTimer() {
@@ -621,6 +715,8 @@
 
     // Practice test
     document.getElementById("startTest").addEventListener("click", startPracticeTest);
+    document.getElementById("printTest").addEventListener("click", () => generateTestPDF(false));
+    document.getElementById("printTestKey").addEventListener("click", () => generateTestPDF(true));
     document.getElementById("submitTest").addEventListener("click", () => {
       const unanswered = test.ids.filter(id => test.answers[id] === undefined).length;
       if (unanswered > 0) {

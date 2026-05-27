@@ -506,6 +506,21 @@ main {
   min-height: 44px;
 }
 
+.print-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
 .danger-btn {
   padding: 10px 24px;
   background: var(--error);

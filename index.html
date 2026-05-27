@@ -149,7 +149,8 @@
             <label>Questions</label>
             <select id="testCount">
               <option value="25">25 (Quick)</option>
-              <option value="40" selected>40 (Full Exam)</option>
+              <option value="40">40 (Full Exam)</option>
+              <option value="50" selected>50 (Extended)</option>
             </select>
           </div>
           <div class="setup-group">
@@ -162,6 +163,10 @@
           </div>
         </div>
         <button id="startTest" class="primary-btn">Start Test</button>
+        <div class="print-actions">
+          <button id="printTest" class="secondary-btn print-btn">&#128438; Print Test</button>
+          <button id="printTestKey" class="secondary-btn print-btn">&#128438; Print Test with Answer Key</button>
+        </div>
       </div>
       <div id="testActive" class="test-active" style="display:none;">
         <div class="test-header">
@@ -202,6 +207,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
   <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>
