@@ -480,7 +480,9 @@
       });
     }
 
-    doc.output("dataurlnewwindow");
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
   }
 
   function startTestTimer() {
